@@ -26,18 +26,20 @@ jobs:
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: build/*
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Validates GO releaser config
-      uses: docker://goreleaser/goreleaser:latest
-      with:
-        args: check
-
-    - name: Create release on GitHub
-      uses: docker://goreleaser/goreleaser:latest
-      with:
+              # files: build/*
         args: release
       env:
+              # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+        # - name: Validates GO releaser config
+        #   uses: docker://goreleaser/goreleaser:latest
+        #   with:
+        #     args: check
+
+        # - name: Create release on GitHub
+        #   uses: docker://goreleaser/goreleaser:latest
+        #   with:
+        #     args: release
+        #   env:
+        #     GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
