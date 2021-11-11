@@ -83,13 +83,15 @@ func BuildTermiteFromPrebuildAssets(targetFilename string, targetAddress string)
 		replacement[i] = 0x20
 	}
 
-	for i := 0; i < len(targetAddress); i++ {
-		replacement[i] = targetAddress[i]
-	}
+	//for i := 0; i < len(targetAddress); i++ {
+	//	replacement[i] = targetAddress[i]
+	//}
 
 	// Step 3: Replacing the placeholder
 	log.Success("Replacing `%s` to: `%s`", placeHolder, replacement)
-	content = bytes.Replace(content, []byte(placeHolder), replacement, 1)
+	// content = bytes.Replace(content, []byte(placeHolder), replacement, 1)
+	// by luhf
+	content = bytes.Replace(content, []byte(placeHolder), []byte(targetAddress), 1)
 
 	// Step 4: Create binary file
 	err = ioutil.WriteFile(targetFilename, content, 0755)
