@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/WangYihang/Platypus/internal/util/assets"
-	"github.com/WangYihang/Platypus/internal/util/log"
-	"github.com/WangYihang/Platypus/internal/util/str"
+	"Platypus/internal/util/assets"
+	"Platypus/internal/util/log"
+	"Platypus/internal/util/str"
 )
 
 func Compile(target string) bool {

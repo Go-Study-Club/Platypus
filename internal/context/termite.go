@@ -15,12 +15,12 @@ import (
 	"golang.org/x/term"
 	"gopkg.in/olahol/melody.v1"
 
-	"github.com/WangYihang/Platypus/internal/util/hash"
-	"github.com/WangYihang/Platypus/internal/util/log"
-	"github.com/WangYihang/Platypus/internal/util/message"
-	oss "github.com/WangYihang/Platypus/internal/util/os"
-	"github.com/WangYihang/Platypus/internal/util/str"
-	"github.com/WangYihang/Platypus/internal/util/update"
+	"Platypus/internal/util/hash"
+	"Platypus/internal/util/log"
+	"Platypus/internal/util/message"
+	oss "Platypus/internal/util/os"
+	"Platypus/internal/util/str"
+	"Platypus/internal/util/update"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/jedib0t/go-pretty/table"
 )
@@ -304,7 +304,7 @@ func (c *TermiteClient) StartShell() {
 	columns, rows, _ := term.GetSize(0)
 
 	key := str.RandomString(0x10)
-	c.RequestStartProcess("/bin/bash", columns, rows, key)
+	c.RequestStartProcess("/bin/sh", columns, rows, key)
 
 	// Create Process Object
 	process := Process{

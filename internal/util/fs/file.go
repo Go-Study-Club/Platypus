@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/WangYihang/Platypus/internal/util/assets"
+	"Platypus/internal/util/assets"
 	assetfs "github.com/elazarl/go-bindata-assetfs"
 )
 

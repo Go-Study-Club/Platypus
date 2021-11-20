@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/WangYihang/Platypus/internal/util/fs"
-	"github.com/WangYihang/Platypus/internal/util/log"
-	"github.com/WangYihang/Platypus/internal/util/message"
-	"github.com/WangYihang/Platypus/internal/util/str"
+	"Platypus/internal/util/fs"
+	"Platypus/internal/util/log"
+	"Platypus/internal/util/message"
+	"Platypus/internal/util/str"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
@@ -155,7 +155,7 @@ func CreateRESTfulAPIServer() *gin.Engine {
 			key := str.RandomString(0x10)
 			s.Set("key", key)
 
-			currentTermite.RequestStartProcess("/bin/bash", 0, 0, key)
+			currentTermite.RequestStartProcess("/bin/sh", 0, 0, key)
 
 			// Create Process Object
 			process := Process{

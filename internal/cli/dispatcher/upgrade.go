@@ -3,9 +3,9 @@ package dispatcher
 import (
 	"fmt"
 
-	"github.com/WangYihang/Platypus/internal/context"
-	"github.com/WangYihang/Platypus/internal/util/log"
-	"github.com/WangYihang/Platypus/internal/util/os"
+	"Platypus/internal/context"
+	"Platypus/internal/util/log"
+	"Platypus/internal/util/os"
 )
 
 func (dispatcher commandDispatcher) Upgrade(args []string) {

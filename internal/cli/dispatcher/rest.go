@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/WangYihang/Platypus/internal/context"
-	"github.com/WangYihang/Platypus/internal/util/log"
+	"Platypus/internal/context"
+	"Platypus/internal/util/log"
 )
 
 func (dispatcher commandDispatcher) REST(args []string) {

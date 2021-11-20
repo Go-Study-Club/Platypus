@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/WangYihang/Platypus/internal/context"
-	"github.com/WangYihang/Platypus/internal/util/log"
+	"Platypus/internal/context"
+	"Platypus/internal/util/log"
 	"golang.org/x/term"
 )
 

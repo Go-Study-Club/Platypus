@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/WangYihang/Platypus/internal/util/assets"
-	"github.com/WangYihang/Platypus/internal/util/log"
+	"Platypus/internal/util/assets"
+	"Platypus/internal/util/log"
 )
 
 func ParsePort(host string, defaultPort uint16) uint16 {

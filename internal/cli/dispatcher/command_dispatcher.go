@@ -8,9 +8,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/WangYihang/Platypus/internal/context"
-	"github.com/WangYihang/Platypus/internal/util/log"
-	"github.com/WangYihang/Platypus/internal/util/reflection"
+	"Platypus/internal/context"
+	"Platypus/internal/util/log"
+	"Platypus/internal/util/reflection"
 	"github.com/WangYihang/readline"
 	"github.com/google/shlex"
 )

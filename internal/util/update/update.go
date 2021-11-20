@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/WangYihang/Platypus/internal/util/log"
-	"github.com/WangYihang/Platypus/internal/util/ui"
+	"Platypus/internal/util/log"
+	"Platypus/internal/util/ui"
 	"github.com/blang/semver"
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
 )
