@@ -105,8 +105,12 @@ type BodyGetClientInfo struct{}
 type BodyDuplicateClient struct{}
 
 type BodyClientInfo struct {
-	Version           string
+	SystemInfo        string
 	OS                string
+	Arch              string
+	Shell             string
+	OutIP             string
+	Version           string
 	User              string
 	Python2           string
 	Python3           string

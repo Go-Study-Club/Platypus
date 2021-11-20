@@ -24,3 +24,6 @@ config-v*.yml
 
 # .idea file
 .idea/
+
+# test
+test/

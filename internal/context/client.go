@@ -31,6 +31,10 @@ type TCPClient struct {
 	interactive       bool                `json:"-"`
 	ptyEstablished    bool                `json:"-"`
 	GroupDispatch     bool                `json:"group_dispatch"`
+	SystemInfo        string              `json:"system_info"`
+	Arch              string              `json:"arch"`
+	Shell             string              `json:"shell"`
+	OutIP             string              `json:"out_ip"`
 	Hash              string              `json:"hash"`
 	Host              string              `json:"host"`
 	Port              uint16              `json:"port"`
@@ -65,6 +69,10 @@ func CreateTCPClient(conn net.Conn, server *TCPServer) *TCPClient {
 		Port:              uint16(port),
 		Alias:             "",
 		NetworkInterfaces: map[string]string{},
+		SystemInfo:        "",
+		Arch:              "",
+		Shell:             "",
+		OutIP:             "",
 		OS:                oss.Unknown,
 		Python2:           "",
 		Python3:           "",
@@ -154,6 +162,10 @@ func (c *TCPClient) AsTable() {
 	t.AppendRow([]interface{}{
 		c.Hash,
 		c.conn.RemoteAddr().String(),
+		c.SystemInfo,
+		c.Arch,
+		c.Shell,
+		c.OutIP,
 		c.OS.String(),
 		c.User,
 		c.Python2 != "" || c.Python3 != "",
@@ -341,7 +353,7 @@ func (c *TCPClient) tryReadEcho(echo string) (bool, string) {
 	// Check whether the client enable terminal echo
 	inputBuffer := make([]byte, 1)
 	var outputBuffer bytes.Buffer
-	var echoEnabled bool = true
+	var echoEnabled = true
 
 	// Clean all prompt
 	// eg: `root@root:/root# `

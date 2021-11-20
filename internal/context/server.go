@@ -29,19 +29,19 @@ type WebSocketMessage struct {
 }
 
 type TCPServer struct {
-	Host           string                      `json:"host"`
-	GroupDispatch  bool                        `json:"group_dispatch"`
-	Port           uint16                      `json:"port"`
-	Clients        map[string](*TCPClient)     `json:"clients"`
-	TermiteClients map[string](*TermiteClient) `json:"termite_clients"`
-	TimeStamp      time.Time                   `json:"timestamp"`
-	Interfaces     []string                    `json:"interfaces"`
-	Hash           string                      `json:"hash"`
-	Encrypted      bool                        `json:"encrypted"`
-	DisableHistory bool                        `json:"disable_history"`
-	PublicIP       string                      `json:"public_ip"`
-	hashFormat     string                      `json:"-"`
-	stopped        chan struct{}               `json:"-"`
+	Host           string                    `json:"host"`
+	GroupDispatch  bool                      `json:"group_dispatch"`
+	Port           uint16                    `json:"port"`
+	Clients        map[string]*TCPClient     `json:"clients"`
+	TermiteClients map[string]*TermiteClient `json:"termite_clients"`
+	TimeStamp      time.Time                 `json:"timestamp"`
+	Interfaces     []string                  `json:"interfaces"`
+	Hash           string                    `json:"hash"`
+	Encrypted      bool                      `json:"encrypted"`
+	DisableHistory bool                      `json:"disable_history"`
+	PublicIP       string                    `json:"public_ip"`
+	hashFormat     string                    `json:"-"`
+	stopped        chan struct{}             `json:"-"`
 }
 
 func CreateTCPServer(host string, port uint16, hashFormat string, encrypted bool, disableHistory bool, PublicIP string) *TCPServer {
@@ -61,8 +61,8 @@ func CreateTCPServer(host string, port uint16, hashFormat string, encrypted bool
 		Host:           host,
 		Port:           port,
 		GroupDispatch:  true,
-		Clients:        make(map[string](*TCPClient)),
-		TermiteClients: make(map[string](*TermiteClient)),
+		Clients:        make(map[string]*TCPClient),
+		TermiteClients: make(map[string]*TermiteClient),
 		Interfaces:     []string{},
 		TimeStamp:      time.Now(),
 		hashFormat:     hashFormat,
@@ -266,11 +266,15 @@ func (s *TCPServer) AsTable() {
 			len((*s).Clients),
 		))
 
-		t.AppendHeader(table.Row{"Hash", "Network", "OS", "User", "Python", "Time", "Alias", "GroupDispatch"})
+		t.AppendHeader(table.Row{"Hash", "SystemInfo", "Arch", "Shell", "OutIP", "Network", "OS", "User", "Python", "Time", "Alias", "GroupDispatch"})
 
 		for chash, client := range s.Clients {
 			t.AppendRow([]interface{}{
 				chash,
+				client.SystemInfo,
+				client.Arch,
+				client.Shell,
+				client.OutIP,
 				client.conn.RemoteAddr().String(),
 				client.OS.String(),
 				client.User,
@@ -284,6 +288,10 @@ func (s *TCPServer) AsTable() {
 		for chash, client := range s.TermiteClients {
 			t.AppendRow([]interface{}{
 				chash,
+				client.SystemInfo,
+				client.Arch,
+				client.Shell,
+				client.OutIP,
 				client.conn.RemoteAddr().String(),
 				client.OS.String(),
 				client.User,
@@ -421,7 +429,7 @@ func (s *TCPServer) DeleteTCPClient(client *TCPClient) {
 	client.Close()
 }
 
-func (s *TCPServer) GetAllTCPClients() map[string](*TCPClient) {
+func (s *TCPServer) GetAllTCPClients() map[string]*TCPClient {
 	return s.Clients
 }
 
@@ -459,7 +467,6 @@ func (s *TCPServer) NotifyWebSocketOnlineTermiteClient(client *TermiteClient) {
 	Ctx.NotifyWebSocket.Broadcast(msg)
 }
 
-// Encrypted clients
 func (s *TCPServer) AddTermiteClient(client *TermiteClient) {
 	if _, exists := s.TermiteClients[client.Hash]; exists {
 		log.Error("Duplicated income connection detected!")
@@ -773,6 +780,6 @@ func (s *TCPServer) DeleteTermiteClient(client *TermiteClient) {
 	client.Close()
 }
 
-func (s *TCPServer) GetAllTermiteClients() map[string](*TermiteClient) {
+func (s *TCPServer) GetAllTermiteClients() map[string]*TermiteClient {
 	return s.TermiteClients
 }

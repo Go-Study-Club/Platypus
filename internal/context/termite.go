@@ -44,6 +44,10 @@ type Process struct {
 
 type TermiteClient struct {
 	conn              net.Conn            `json:"-"`
+	SystemInfo        string              `json:"system_info"`
+	Arch              string              `json:"arch"`
+	Shell             string              `json:"shell"`
+	OutIP             string              `json:"out_ip"`
 	Hash              string              `json:"hash"`
 	Host              string              `json:"host"`
 	Port              uint16              `json:"port"`
@@ -71,6 +75,10 @@ func CreateTermiteClient(conn net.Conn, server *TCPServer, disableHistory bool) 
 	port, _ := strconv.Atoi(strings.Split(conn.RemoteAddr().String(), ":")[1])
 	return &TermiteClient{
 		conn:              conn,
+		SystemInfo:        "",
+		Arch:              "",
+		Shell:             "",
+		OutIP:             "",
 		Hash:              "",
 		Host:              host,
 		Port:              uint16(port),
@@ -159,6 +167,10 @@ func (c *TermiteClient) GatherClientInfo(hashFormat string) bool {
 		clientInfo := msg.Body.(*message.BodyClientInfo)
 		c.Version = clientInfo.Version
 		log.Info("Client version: v%s", c.Version)
+		c.SystemInfo = clientInfo.SystemInfo
+		c.Arch = clientInfo.Arch
+		c.Shell = clientInfo.Shell
+		c.OutIP = clientInfo.OutIP
 		c.OS = oss.Parse(clientInfo.OS)
 		c.User = clientInfo.User
 		c.Python2 = clientInfo.Python2
