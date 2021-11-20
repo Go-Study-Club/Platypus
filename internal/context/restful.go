@@ -70,7 +70,7 @@ func CreateRESTfulAPIServer() *gin.Engine {
 		notifyWebSocket.HandleRequest(c.Writer, c.Request)
 	})
 	notifyWebSocket.HandleConnect(func(s *melody.Session) {
-		log.Info("Notify client conencted from: %s", s.Request.RemoteAddr)
+		log.Info("Notify client connected from: %s", s.Request.RemoteAddr)
 	})
 
 	notifyWebSocket.HandleMessage(func(s *melody.Session, msg []byte) {
@@ -418,7 +418,6 @@ func CreateRESTfulAPIServer() *gin.Engine {
 		}
 		clientAPIGroup := RESTfulAPIGroup.Group("/client")
 		{
-
 			// Client related
 			clientAPIGroup.GET("", func(c *gin.Context) {
 				clients := make(map[string]interface{})
