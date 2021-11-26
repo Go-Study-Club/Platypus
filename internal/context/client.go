@@ -19,7 +19,7 @@ import (
 	"Platypus/internal/util/log"
 	oss "Platypus/internal/util/os"
 	"Platypus/internal/util/str"
-	humanize "github.com/dustin/go-humanize"
+	"github.com/dustin/go-humanize"
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/vbauerster/mpb/v6"
 	"github.com/vbauerster/mpb/v6/decor"
@@ -35,6 +35,7 @@ type TCPClient struct {
 	Arch              string              `json:"arch"`
 	Shell             string              `json:"shell"`
 	OutIP             string              `json:"out_ip"`
+	MyRouter          string              `json:"my_router"`
 	Hash              string              `json:"hash"`
 	Host              string              `json:"host"`
 	Port              uint16              `json:"port"`
@@ -73,6 +74,7 @@ func CreateTCPClient(conn net.Conn, server *TCPServer) *TCPClient {
 		Arch:              "",
 		Shell:             "",
 		OutIP:             "",
+		MyRouter:          "",
 		OS:                oss.Unknown,
 		Python2:           "",
 		Python3:           "",
@@ -166,6 +168,7 @@ func (c *TCPClient) AsTable() {
 		c.Arch,
 		c.Shell,
 		c.OutIP,
+		c.MyRouter,
 		c.OS.String(),
 		c.User,
 		c.Python2 != "" || c.Python3 != "",

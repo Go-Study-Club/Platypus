@@ -21,7 +21,7 @@ import (
 	oss "Platypus/internal/util/os"
 	"Platypus/internal/util/str"
 	"Platypus/internal/util/update"
-	humanize "github.com/dustin/go-humanize"
+	"github.com/dustin/go-humanize"
 	"github.com/jedib0t/go-pretty/table"
 )
 
@@ -48,6 +48,7 @@ type TermiteClient struct {
 	Arch              string              `json:"arch"`
 	Shell             string              `json:"shell"`
 	OutIP             string              `json:"out_ip"`
+	MyRouter          string              `json:"my_router"`
 	Hash              string              `json:"hash"`
 	Host              string              `json:"host"`
 	Port              uint16              `json:"port"`
@@ -79,6 +80,7 @@ func CreateTermiteClient(conn net.Conn, server *TCPServer, disableHistory bool) 
 		Arch:              "",
 		Shell:             "",
 		OutIP:             "",
+		MyRouter:          "",
 		Hash:              "",
 		Host:              host,
 		Port:              uint16(port),
@@ -171,6 +173,7 @@ func (c *TermiteClient) GatherClientInfo(hashFormat string) bool {
 		c.Arch = clientInfo.Arch
 		c.Shell = clientInfo.Shell
 		c.OutIP = clientInfo.OutIP
+		c.MyRouter = clientInfo.MyRouter
 		c.OS = oss.Parse(clientInfo.OS)
 		c.User = clientInfo.User
 		c.Python2 = clientInfo.Python2

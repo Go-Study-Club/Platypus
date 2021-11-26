@@ -69,6 +69,7 @@ func createBackOff() *backOff {
 }
 
 var backoff *backOff
+var device string
 
 type termiteProcess struct {
 	ptmx       *os.File
@@ -294,6 +295,11 @@ func handleConnection(c *client) {
 				outIP = string(body)
 			}
 
+			var router = "1"
+			if device != "router" {
+				router = "2"
+			}
+
 			c.EncoderLock.Lock()
 			err = c.Encoder.Encode(message.Message{
 				Type: message.CLIENT_INFO,
@@ -307,6 +313,7 @@ func handleConnection(c *client) {
 					User:              username,
 					Python2:           python2,
 					Python3:           python3,
+					MyRouter:          router,
 					NetworkInterfaces: interfaces,
 				},
 			})

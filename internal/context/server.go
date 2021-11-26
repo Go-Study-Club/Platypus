@@ -266,7 +266,7 @@ func (s *TCPServer) AsTable() {
 			len((*s).Clients),
 		))
 
-		t.AppendHeader(table.Row{"Hash", "SystemInfo", "Arch", "Shell", "OutIP", "Network", "OS", "User", "Python", "Time", "Alias", "GroupDispatch"})
+		t.AppendHeader(table.Row{"Hash", "SystemInfo", "Arch", "Shell", "OutIP", "MyRouter", "Network", "OS", "User", "Python", "Time", "Alias", "GroupDispatch"})
 
 		for chash, client := range s.Clients {
 			t.AppendRow([]interface{}{
@@ -275,6 +275,7 @@ func (s *TCPServer) AsTable() {
 				client.Arch,
 				client.Shell,
 				client.OutIP,
+				client.MyRouter,
 				client.conn.RemoteAddr().String(),
 				client.OS.String(),
 				client.User,
@@ -292,6 +293,7 @@ func (s *TCPServer) AsTable() {
 				client.Arch,
 				client.Shell,
 				client.OutIP,
+				client.MyRouter,
 				client.conn.RemoteAddr().String(),
 				client.OS.String(),
 				client.User,
