@@ -34,15 +34,14 @@ build_frontend: prepare
 
 build_termite: prepare
 	echo "Building termite"
-	# echo -e "Building termite_linux_amd64"
-	env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -extldflags -static" -trimpath -o ./build/termite/termite_linux_amd64 cmd/termite/main.go
-	env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -extldflags -static -X 'main.device=router'" -trimpath -o ./build/termite/termite_router cmd/termite/main.go
-	env CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -extldflags -static" -trimpath -o ./build/termite/termite_darwin_amd64 cmd/termite/main.go
-	env CGO_ENABLED=0 GOOS=freebsd GOARCH=amd64 go build -ldflags="-s -w -extldflags -static" -trimpath -o ./build/termite/termite_freebsd_amd64 cmd/termite/main.go
-	env CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w -extldflags -static" -trimpath -o ./build/termite/termite_linux_arm64 cmd/termite/main.go
-	env CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -extldflags -static" -trimpath -o ./build/termite/termite_darwin_arm64 cmd/termite/main.go
-	env CGO_ENABLED=0 GOOS=freebsd GOARCH=arm64 go build -ldflags="-s -w -extldflags -static" -trimpath -o ./build/termite/termite_freebsd_arm64 cmd/termite/main.go
-	env CGO_ENABLED=0 GOOS=linux GOARCH=mips64 go build -ldflags="-s -w -extldflags -static" -trimpath -o ./build/termite/termite_linux_mips64 cmd/termite/main.go
+	env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o ./build/termite/terminator_linux_amd64 cmd/termite/main.go
+	env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X 'main.device=router'" -trimpath -o ./build/termite/terminator_router cmd/termite/main.go
+	env CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o ./build/termite/terminator_darwin_amd64 cmd/termite/main.go
+	env CGO_ENABLED=0 GOOS=freebsd GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o ./build/termite/terminator_freebsd_amd64 cmd/termite/main.go
+	env CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -trimpath -o ./build/termite/terminator_linux_arm64 cmd/termite/main.go
+	env CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -trimpath -o ./build/termite/terminator_darwin_arm64 cmd/termite/main.go
+	env CGO_ENABLED=0 GOOS=freebsd GOARCH=arm64 go build -ldflags="-s -w" -trimpath -o ./build/termite/terminator_freebsd_arm64 cmd/termite/main.go
+	env CGO_ENABLED=0 GOOS=linux GOARCH=mips64 go build -ldflags="-s -w" -trimpath -o ./build/termite/terminator_linux_mips64 cmd/termite/main.go
 	find build/termite/ -type f -executable |grep -v mips64 |grep -v arm64 |grep -v freebsd_amd64 | xargs upx
 
 collect_assets: build_frontend build_termite
@@ -59,9 +58,9 @@ build_platypus: collect_assets
 	env go build -ldflags="-s -w " -trimpath -o ./build/platypus/platypus cmd/platypus/main.go
 
 release: install_dependency_github_action collect_assets
-	env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w " -trimpath -o ./build/platypus/platypus_linux_amd64 cmd/platypus/main.go
-	env CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w " -trimpath -o ./build/platypus/platypus_darwin_amd64 cmd/platypus/main.go
-	env CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="-s -w " -trimpath -o ./build/platypus/platypus_windows_amd64.exe cmd/platypus/main.go
+	env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o ./build/platypus/platypus_linux_amd64 cmd/platypus/main.go
+	env CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o ./build/platypus/platypus_darwin_amd64 cmd/platypus/main.go
+	env CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o ./build/platypus/platypus_windows_amd64.exe cmd/platypus/main.go
 	find build/platypus/ -type f -executable |grep -v mips64 |grep -v arm64 |grep -v freebsd_amd64 | xargs upx
 
 clean:
