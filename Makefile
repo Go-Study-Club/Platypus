@@ -1,6 +1,9 @@
 all: install_dependency release
 
-build: build_platypus
+build: release
+
+update: install_dependency_github_action
+
 
 install_dependency:
 	sudo apt-get update
@@ -55,13 +58,12 @@ dev:
 
 build_platypus: collect_assets
 	echo "Building platypus"
-	env go build -ldflags="-s -w " -trimpath -o ./build/platypus/platypus cmd/platypus/main.go
-
-release: install_dependency_github_action collect_assets
 	env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o ./build/platypus/platypus_linux_amd64 cmd/platypus/main.go
 	env CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o ./build/platypus/platypus_darwin_amd64 cmd/platypus/main.go
 	env CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o ./build/platypus/platypus_windows_amd64.exe cmd/platypus/main.go
 	find build/platypus/ -type f -executable |grep -v mips64 |grep -v arm64 |grep -v freebsd_amd64 | xargs upx
+
+release: build_platypus
 
 clean:
 	@rm -rf build

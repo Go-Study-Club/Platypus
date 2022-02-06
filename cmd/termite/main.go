@@ -152,6 +152,8 @@ func handleConnection(c *client) {
 				ptmx:       ptmx,
 				process:    process,
 			}
+			log.Success("Process started: %d", process.Process.Pid)
+			log.Success("Process added: %v", processes)
 			defer func() { _ = ptmx.Close() }()
 
 			c.EncoderLock.Lock()

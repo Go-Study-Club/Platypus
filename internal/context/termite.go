@@ -61,6 +61,7 @@ type TermiteClient struct {
 	Python3           string              `json:"python3"`
 	TimeStamp         time.Time           `json:"timestamp"`
 	DisableHistory    bool                `json:"disable_hisory"`
+	GroupDispatch     bool                `json:"group_dispatch"`
 	server            *TCPServer          `json:"-"`
 	encoderLock       *sync.Mutex         `json:"-"`
 	decoderLock       *sync.Mutex         `json:"-"`
@@ -100,6 +101,7 @@ func CreateTermiteClient(conn net.Conn, server *TCPServer, disableHistory bool) 
 		processes:         map[string]*Process{},
 		currentProcessKey: "",
 		DisableHistory:    disableHistory,
+		GroupDispatch:     false,
 	}
 }
 
@@ -129,6 +131,10 @@ func (c *TermiteClient) UnlockDecoder() {
 
 func (c *TermiteClient) GetHashFormat() string {
 	return c.server.hashFormat
+}
+
+func (c *TermiteClient) GetShellPath() string {
+	return c.server.ShellPath
 }
 
 func (c *TermiteClient) StartSocks5Server() {
@@ -319,7 +325,7 @@ func (c *TermiteClient) StartShell() {
 	columns, rows, _ := term.GetSize(0)
 
 	key := str.RandomString(0x10)
-	c.RequestStartProcess("/bin/sh", columns, rows, key)
+	c.RequestStartProcess(c.GetShellPath(), columns, rows, key)
 
 	// Create Process Object
 	process := Process{
@@ -500,7 +506,7 @@ func (c *TermiteClient) Close() {
 func (c *TermiteClient) AsTable() {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"Hash", "Network", "OS", "User", "Python", "Time", "Alias"})
+	t.AppendHeader(table.Row{"Hash", "Network", "OS", "User", "Python", "Time", "Alias", "GroupDispatch"})
 	t.AppendRow([]interface{}{
 		c.Hash,
 		c.conn.RemoteAddr().String(),
@@ -509,6 +515,7 @@ func (c *TermiteClient) AsTable() {
 		c.Python2 != "" || c.Python3 != "",
 		humanize.Time(c.TimeStamp),
 		c.Alias,
+		c.GroupDispatch,
 	})
 	t.Render()
 }
@@ -582,8 +589,8 @@ func (c *TermiteClient) OnelineDesc() string {
 
 func (c *TermiteClient) FullDesc() string {
 	addr := c.conn.RemoteAddr()
-	return fmt.Sprintf("[%s] %s://%s (connected at: %s) [%s]", c.Hash, addr.Network(), addr.String(),
-		humanize.Time(c.TimeStamp), c.OS.String())
+	return fmt.Sprintf("[%s] %s://%s (connected at: %s) [%s] [%t]", c.Hash, addr.Network(), addr.String(),
+		humanize.Time(c.TimeStamp), c.OS.String(), c.GroupDispatch)
 }
 
 func (c *TermiteClient) AddProcess(key string, process *Process) {
