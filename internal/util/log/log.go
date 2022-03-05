@@ -8,7 +8,7 @@ import (
 	"github.com/fatih/color"
 )
 
-var Logger = log.New(os.Stdout, "", log.LstdFlags|log.Ltime)
+var Logger = log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile)
 
 const (
 	debug   = "[DEBUG]"

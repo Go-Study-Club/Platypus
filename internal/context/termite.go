@@ -49,6 +49,7 @@ type TermiteClient struct {
 	Shell             string              `json:"shell"`
 	OutIP             string              `json:"out_ip"`
 	MyRouter          string              `json:"my_router"`
+	Node              string              `json:"node"`
 	Hash              string              `json:"hash"`
 	Host              string              `json:"host"`
 	Port              uint16              `json:"port"`
@@ -82,6 +83,7 @@ func CreateTermiteClient(conn net.Conn, server *TCPServer, disableHistory bool) 
 		Shell:             "",
 		OutIP:             "",
 		MyRouter:          "",
+		Node:              "",
 		Hash:              "",
 		Host:              host,
 		Port:              uint16(port),
@@ -180,6 +182,7 @@ func (c *TermiteClient) GatherClientInfo(hashFormat string) bool {
 		c.Shell = clientInfo.Shell
 		c.OutIP = clientInfo.OutIP
 		c.MyRouter = clientInfo.MyRouter
+		c.Node = clientInfo.Node
 		c.OS = oss.Parse(clientInfo.OS)
 		c.User = clientInfo.User
 		c.Python2 = clientInfo.Python2

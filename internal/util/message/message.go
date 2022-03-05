@@ -115,6 +115,7 @@ type BodyClientInfo struct {
 	Python2           string
 	Python3           string
 	MyRouter          string
+	Node              string
 	NetworkInterfaces map[string]string
 }
 

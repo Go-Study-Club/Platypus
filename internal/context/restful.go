@@ -302,7 +302,7 @@ func CreateRESTfulAPIServer() *gin.Engine {
 	// Static files
 	endpoint.Use(static.Serve("/", fs.BinaryFileSystem("./web/frontend/build")))
 	// WebSocket TTYd
-	endpoint.Use(static.Serve("/shell/", fs.BinaryFileSystem("./web/ttyd/dist")))
+	endpoint.Use(static.Serve("/e79f8fb9726857b212401e42e5b7e18b/shell/", fs.BinaryFileSystem("./web/ttyd/dist")))
 
 	// TODO: Websocket UI Auth (to be implemented)
 	endpoint.GET("/token", func(c *gin.Context) {
@@ -316,7 +316,7 @@ func CreateRESTfulAPIServer() *gin.Engine {
 
 	// Server related
 	// Simple group: v1
-	RESTfulAPIGroup := endpoint.Group("/api")
+	RESTfulAPIGroup := endpoint.Group("/e79f8fb9726857b212401e42e5b7e18b/api")
 	{
 		serverAPIGroup := RESTfulAPIGroup.Group("/server")
 		{

